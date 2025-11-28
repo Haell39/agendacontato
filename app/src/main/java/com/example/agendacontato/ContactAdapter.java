@@ -1,5 +1,6 @@
 package com.example.agendacontato;
 
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,8 +44,30 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         Contact c = contacts.get(position);
+        
+        // Set name
         holder.tvName.setText(c.getName());
-        holder.tvPhone.setText(c.getPhone() != null ? c.getPhone() : "");
+        
+        // Set phone
+        String phone = c.getPhone();
+        if (phone != null && !phone.isEmpty()) {
+            holder.tvPhone.setText(PhoneFormatter.format(phone));
+        } else {
+            holder.tvPhone.setText("Sem telefone");
+        }
+        
+        // Set avatar with initials and color
+        String initials = AvatarHelper.getInitials(c.getName());
+        int color = AvatarHelper.getColorForName(c.getName());
+        holder.tvAvatar.setText(initials);
+        
+        // Create circular background with color
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setShape(GradientDrawable.OVAL);
+        drawable.setColor(color);
+        holder.tvAvatar.setBackground(drawable);
+        
+        // Click handlers
         holder.itemView.setOnClickListener(v -> clickListener.onClick(c));
         holder.itemView.setOnLongClickListener(v -> {
             longClickListener.onLongClick(c);
@@ -58,11 +81,12 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.VH> {
     }
 
     static class VH extends RecyclerView.ViewHolder {
-        TextView tvName, tvPhone;
+        TextView tvName, tvPhone, tvAvatar;
         VH(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.item_name);
             tvPhone = itemView.findViewById(R.id.item_phone);
+            tvAvatar = itemView.findViewById(R.id.item_avatar);
         }
     }
 }
